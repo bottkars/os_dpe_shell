@@ -1,0 +1,10 @@
+﻿$Global:OS_USERNAME = "admin"
+$Global:OS_PASSWORD = "Password123!"
+$Global:OS_KEYSTONE_IP = "192.168.2.203"
+$Global:OS_KEYSTONE_PORT = 5000
+$GLobal:MC_USERNAME = "MCUser"
+$Global:MC_Password = "Password123_"
+$Global:AVAMAR_IP = "192.168.2.31"
+$Global:DPE_API_IP = "172.16.3.13"
+$Global:OS_DOMAIN = "default"
+$Global:OS_Zone_ID = "nova"

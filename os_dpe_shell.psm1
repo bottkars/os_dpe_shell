@@ -3,24 +3,23 @@ function Get-OSToken
     [CmdletBinding()]
     Param
     (
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $OS_USERNAME = $Global:OS_USERNAME,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $OS_Password = $Global:OS_PASSWORD,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $OS_DOMAIN = $Global:OS_DOMAIN,
 	[Parameter(ParameterSetName = "1",Mandatory = $false)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $OS_PROJECT_NAME,
 	[Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateSet('project','domain')]$scope,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $OS_KEYSTONE_IP = $Global:OS_KEYSTONE_IP,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [int]$OS_KEYSTONE_PORT = $Global:OS_KEYSTONE_PORT,
     $OS_API_VER = "v3"
     )
-
 <#
 {"auth": {
 "identity": {
@@ -38,7 +37,6 @@ switch ($scope)
 		{
 		$OS_SCOPE_NAME = $OS_DOMAIN
 		}
-	
 	}
 $jsonbody = [ordered]@{auth = [ordered]@{
                 identity = [ordered]@{
@@ -57,7 +55,7 @@ $jsonbody = [ordered]@{auth = [ordered]@{
 						}
 					}#>
                   }
-                } 
+                }
             } | ConvertTo-Json -Depth 7
 $uri = "http://$($OS_KEYSTONE_IP):$($OS_KEYSTONE_PORT)/$OS_API_VER/auth/tokens"
 Write-Verbose "connecting to $uri"
@@ -71,8 +69,10 @@ Write-Verbose $token.Headers.'X-Subject-Token'
 if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
     {
     write-Host $PSCmdlet.MyInvocation.BoundParameters
-	Write-Host -ForegroundColor Yellow $token 
-    }$content = $token.Content | ConvertFrom-Json$object = New-Object -TypeName psobject
+	Write-Host -ForegroundColor Yellow $token
+    }
+$content = $token.Content | ConvertFrom-Json
+$object = New-Object -TypeName psobject
 $object.pstypenames.insert(0,'OS_TOKEN')
 $object | Add-Member -MemberType NoteProperty -Name Token -Value $token.Headers.'X-Subject-Token'
 $object | Add-Member -MemberType NoteProperty -Name Content -Value $content.token
@@ -90,7 +90,11 @@ function Get-OSserver
     )
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-##$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/v2.1/compute/v2.1/$Myself"$requestURL =  "http://ubuntu3:8774/compute/v2.1"#/7d206ea3-e379-4a21-ac25-3d1fb612e9ef"Write-Verbose $requestURL Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL #| Select-Object -ExpandProperty $Myself
+#
+#$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/v2.1/compute/v2.1/$Myself"
+$requestURL =  "http://ubuntu3:8774/compute/v2.1"#/7d206ea3-e379-4a21-ac25-3d1fb612e9ef"
+Write-Verbose $requestURL
+Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL #| Select-Object -ExpandProperty $Myself
 }
 #>
 Function Get-DPEprotectionProviders
@@ -100,16 +104,18 @@ Function Get-DPEprotectionProviders
     Param
     (
     [Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $DPE_API_IP = $GLOBAL:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
     $DPE_API_VER = "v1"
     )
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
 $Myself = $MyInvocation.MyCommand.Name.Substring(7)
-$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/protectionProviders"Write-Verbose $requestURL Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/protectionProviders"
+Write-Verbose $requestURL
+Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
 }
 Function Unregister-DPEprotectionProviders
 {
@@ -118,11 +124,11 @@ Function Unregister-DPEprotectionProviders
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
-	[Parameter(ParameterSetName = "1",Mandatory = $true)] 
+	[Parameter(ParameterSetName = "1",Mandatory = $true)]
     $DPE_Providerid,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
     $DPE_API_VER = "v1"
@@ -130,8 +136,9 @@ Function Unregister-DPEprotectionProviders
 $Method = "delete"
 $Myself = $MyInvocation.MyCommand.Name.Substring(14)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_Providerid"Write-Verbose $requestURLInvoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL 
-
+$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_Providerid"
+Write-Verbose $requestURL
+Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
 }
 
 Function Register-DPEprotectionProviders
@@ -141,19 +148,19 @@ Function Register-DPEprotectionProviders
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $MC_USERNAME = $GLobal:MC_USERNAME,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $MC_Password = $global:MC_Password,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $AVAMAR_IP = $GLobal:AVAMAR_IP,
-	[Parameter(ParameterSetName = "1",Mandatory = $true)]	
-	[ValidateNotNullOrEmpty()] 
+	[Parameter(ParameterSetName = "1",Mandatory = $true)]
+	[ValidateNotNullOrEmpty()]
 	$DPE_Providername,
 	$Comment,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
     [int]$AVAMAR_PORT = 9443,
@@ -169,14 +176,15 @@ $Jsonbody = [ordered]@{
  password= "$MC_Password"}
  )
  } | ConvertTo-Json
-$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself"Write-Verbose $requestURLif ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself"
+Write-Verbose $requestURL
+if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
     {
     write-Host $PSCmdlet.MyInvocation.BoundParameters
 	Write-Verbose $Jsonbody
-    }Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL 
-
+    }
+Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL
 }
-
 
 <#{
 "tenants": [{
@@ -188,22 +196,21 @@ $requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself"Writ
 #>
 Function Add-DPEprojects
 {
-
      [CmdletBinding()]
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
     $DPE_API_VER = "v1",
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
-    [string]$OS_Project_ID, 
+	[ValidateNotNullOrEmpty()]
+    [string]$OS_Project_ID,
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [string]$OS_Project_Name,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='1')]
     [alias('id')]$DPE_Provider_ID,
@@ -225,20 +232,22 @@ process
 }
 end
 {
-
     $Jsonbody = [ordered]@{
     $Myself = @( @{name = $OS_Project_Name
                    id = $OS_Project_ID
                    capacityInMB = $capacityMB
                    protectionProviders = $Providers
                    })
-    } | ConvertTo-Json -Depth 7                   
-	
-	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself"	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+    } | ConvertTo-Json -Depth 7
+
+	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself"
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
 		{
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
 		Write-Verbose $Jsonbody
-		}    Write-Verbose $requestURL    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL 
+		}
+    Write-Verbose $requestURL
+    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL
 	}
 }
 Function Add-DPEinstances
@@ -247,18 +256,18 @@ Function Add-DPEinstances
     Param
     (
 	[Parameter(ParameterSetName = "0",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
-	[ValidateNotNullOrEmpty()] 
-    [alias('id')][string]$OS_Project_ID, 
+	[ValidateNotNullOrEmpty()]
+    [alias('id')][string]$OS_Project_ID,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [string[]]$OS_Instance_ID,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [string[]]$OS_Instance_Name,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
@@ -280,7 +289,7 @@ $instances = @()
 foreach ($instance in $OS_Instance_ID)
         {
         $Instances+= [ordered]@{
-        name = $OS_Instance_Name       
+        name = $OS_Instance_Name
         #href= "string"
         #name= "string"
         id= $OS_Instance_ID
@@ -295,22 +304,21 @@ foreach ($instance in $OS_Instance_ID)
 $Jsonbody = [ordered]@{
             $Myself = @($instances)
             }| ConvertTo-Json
-$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$OS_Project_ID/$Myself"        
+$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$OS_Project_ID/$Myself"
 Write-Verbose $requestURL
 	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
 		{
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
 		Write-Host $Jsonbody
-		}
-Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Body $Jsonbody -Uri $requestURL 
+		}
+
+Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Body $Jsonbody -Uri $requestURL
 }
 end
 {
-
-               
-    #    #Write-Verbose $requestURL    #
-
-
+    #
+    #Write-Verbose $requestURL
+    #
 }
 }
 Function Get-DPEinstances
@@ -319,12 +327,12 @@ Function Get-DPEinstances
     Param
     (
 	[Parameter(ParameterSetName = "0",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [string]$OS_Instance_ID,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
@@ -336,32 +344,27 @@ begin
     $Myself = $MyInvocation.MyCommand.Name.Substring(7)
     $Providers = @()
     $Method = "Get"
-    
+
 	Write-Verbose $OS_Instance_ID
-	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$OS_Instance_ID"        
+	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$OS_Instance_ID"
 	Write-Verbose $requestURL
 	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
 		{
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
-		}
-	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL 
-	
-	
-	
+		}
+
+	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
 	}
 
 process
 
 {
-
 }
 end
 {
-
-               
-    #    #Write-Verbose $requestURL    #
-
-
+    #
+    #Write-Verbose $requestURL
+    #
 }
 }
 Function Remove-DPEinstances
@@ -370,12 +373,12 @@ Function Remove-DPEinstances
     Param
     (
 	[Parameter(ParameterSetName = "0",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [string]$OS_Instance_ID,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
@@ -387,35 +390,29 @@ begin
     $Myself = $MyInvocation.MyCommand.Name.Substring(10)
     $Providers = @()
     $Method = "Delete"
-    
+
 	Write-Verbose $OS_Instance_ID
-	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$OS_Instance_ID"        
+	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$OS_Instance_ID"
 	Write-Verbose $requestURL
 	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
 		{
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
-		}
-	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL 
-	
-	
-	
+		}
+
+	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
 	}
 
 process
 
 {
-
 }
 end
 {
-
-               
-    #    #Write-Verbose $requestURL    #
-
-
+    #
+    #Write-Verbose $requestURL
+    #
 }
 }
-
 
 Function Start-DPEbackups
 {
@@ -423,12 +420,12 @@ Function Start-DPEbackups
     Param
     (
 	[Parameter(ParameterSetName = "0",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [string]$OS_Instance_ID,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
@@ -438,51 +435,43 @@ begin
     {
     $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
     $Myself = $MyInvocation.MyCommand.Name.Substring(9
-	
-
 
 	)
     $Providers = @()
     $Method = "Post"
-    
+
 	Write-Verbose $OS_Instance_ID
-	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/instances/$OS_Instance_ID/$Myself"        
+	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/instances/$OS_Instance_ID/$Myself"
 	Write-Verbose $requestURL
 	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
 		{
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
-		}
-	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL 
-	
-	
-	
+		}
+
+	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
 	}
 
 process
 
 {
-
 }
 end
 {
-
-               
-    #    #Write-Verbose $requestURL    #
-
-
+    #
+    #Write-Verbose $requestURL
+    #
 }
 }
 
 Function Get-DPEprojects
 {
-
      [CmdletBinding()]
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
     $DPE_API_VER = "v1"
@@ -496,29 +485,27 @@ begin
 
 process
 {
-
 }
 end
 {
-    $requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself"    Write-Verbose $requestURL    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL | Select-Object -ExpandProperty $Myself
-
-
+    $requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself"
+    Write-Verbose $requestURL
+    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL | Select-Object -ExpandProperty $Myself
 }
 }
 
 Function Remove-DPEprojects
 {
-
      [CmdletBinding()]
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     [Alias('ID')]$DPE_Project_ID,
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
     $DPE_API_VER = "v1"
@@ -532,13 +519,12 @@ begin
 
 process
 {
-
 }
 end
 {
-    $requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_Project_ID"    Write-Verbose $requestURL    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL | Select-Object -ExpandProperty $Myself
-
-
+    $requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_Project_ID"
+    Write-Verbose $requestURL
+    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL | Select-Object -ExpandProperty $Myself
 }
 }
 function Get-OSservers
@@ -553,8 +539,11 @@ function Get-OSservers
     )
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-#$requestURL = "http://$($OS_NOVA_IP):$($OS_NOVA_PORT)/v2.1/$OS_PROJECT_ID/$Myself"#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"Write-Verbose $requestURL Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself | Select-Object * -ExcludeProperty links
-
+#
+$requestURL = "http://$($OS_NOVA_IP):$($OS_NOVA_PORT)/v2.1/$OS_PROJECT_ID/$Myself"
+#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
+Write-Verbose $requestURL
+Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself | Select-Object * -ExcludeProperty links
 }
 
 function Get-OSprojects
@@ -569,11 +558,14 @@ function Get-OSprojects
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-#$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself/"#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"Write-Verbose $requestURL $Projects = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+#
+$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself/"
+#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
+Write-Verbose $requestURL
+$Projects = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
 $Projects.pstypenames.Insert(0,'OS_PROCECTS')
 Write-Output $Projects
 }
-
 
 function Get-OSgroups
 {
@@ -587,11 +579,14 @@ function Get-OSgroups
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-#$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"Write-Verbose $requestURL $Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+#
+$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"
+#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
+Write-Verbose $requestURL
+$Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
 $Object.pstypenames.Insert(0,'OS_groups')
 Write-Output $Object
 }
-
 
 function Get-OSroles
 {
@@ -605,7 +600,11 @@ function Get-OSroles
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-#$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"Write-Verbose $requestURL $Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+#
+$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"
+#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
+Write-Verbose $requestURL
+$Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
 $Object.pstypenames.Insert(0,'OS_groups')
 Write-Output $Object
 }
@@ -622,7 +621,11 @@ function Get-OSregions
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-#$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"Write-Verbose $requestURL $Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+#
+$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"
+#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
+Write-Verbose $requestURL
+$Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
 $Object.pstypenames.Insert(0,'OS_groups')
 Write-Output $Object
 }
@@ -639,7 +642,11 @@ function Get-OSdomains
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-#$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"Write-Verbose $requestURL $Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+#
+$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"
+#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
+Write-Verbose $requestURL
+$Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
 $Object.pstypenames.Insert(0,'OS_groups')
 Write-Output $Object
 }
@@ -656,13 +663,17 @@ function Get-OSusers
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-#$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"Write-Verbose $requestURL $Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+#
+$requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"
+#$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
+Write-Verbose $requestURL
+$Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
 $Object.pstypenames.Insert(0,'OS_groups')
 Write-Output $Object
 }
 
 <#
-‘{"options" : [{"name": "ddr", "value" : "false"}], "name" : “dataset-3", "description" : "backup to GSAN"}’ 
+‘{"options" : [{"name": "ddr", "value" : "false"}], "name" : “dataset-3", "description" : "backup to GSAN"}’
 http(s)://dpe-api-server:8080/v1/projects/{id}/datasets
 #>
 
@@ -676,19 +687,18 @@ http(s)://dpe-api-server:8080/v1/projects/{id}/datasets
 #>
 Function Add-DPEdatasets
 {
-
     [CmdletBinding()]
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='1')]
-	[ValidateNotNullOrEmpty()] 
-    [alias('id')][string]$DPE_Project_ID, 
+	[ValidateNotNullOrEmpty()]
+    [alias('id')][string]$DPE_Project_ID,
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
-    [string]$DPE_DATASETNAME, 
+	[ValidateNotNullOrEmpty()]
+    [string]$DPE_DATASETNAME,
     [switch]$ddr,
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
@@ -706,36 +716,35 @@ process
 		options = @(
 					@{ name = 'ddr'
 					 value = $ddr.IsPresent.ToString().ToLower()
-					 })  
-                name = $DPE_DATASETNAME  
-    } | ConvertTo-Json -Depth 7                   
-	
+					 })
+                name = $DPE_DATASETNAME
+    } | ConvertTo-Json -Depth 7
+
 	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$DPE_Project_ID/$Myself"
-		if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
 		{
 		Write-Verbose $requestURL
 		$Jsonbody
-		}    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL
+		}
+    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL
 }
 end
 {
-
- 
 	}
 }
 
 Function Get-DPEdatasets
 {
-
     [CmdletBinding()]
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='1')]
-	[ValidateNotNullOrEmpty()] 
-    [alias('id')][string]$DPE_Project_ID, 
+	[ValidateNotNullOrEmpty()]
+    [alias('id')][string]$DPE_Project_ID,
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
     $DPE_API_VER = "v1"
@@ -748,19 +757,16 @@ begin
 
 process
 {
-
 	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$DPE_Project_ID/$Myself"
 
 		Write-Verbose $requestURL
-    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Body $Jsonbody -Uri $requestURL | Select-Object -ExpandProperty $Myself
+
+    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Body $Jsonbody -Uri $requestURL | Select-Object -ExpandProperty $Myself
 }
 end
 {
-
- 
 	}
 }
-
 
 <#
 {"description" : "backup retention",
@@ -773,24 +779,23 @@ end
 
 Function Add-DPEretentions
 {
-
     [CmdletBinding()]
     Param
     (
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
-	[ValidateNotNullOrEmpty()] 
+	[ValidateNotNullOrEmpty()]
     $token,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='1')]
-	[ValidateNotNullOrEmpty()] 
-    [alias('id')][string]$DPE_Project_ID, 
+	[ValidateNotNullOrEmpty()]
+    [alias('id')][string]$DPE_Project_ID,
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
 	[ValidateNotNullOrEmpty()]
-	[ValidateSet(computed, advanced, never)] 
-    [string]$DPE_retentionType, 
+	[ValidateSet(computed, advanced, never)]
+    [string]$DPE_retentionType,
 	[Parameter(ParameterSetName = "1",Mandatory = $false]
 	[ValidateNotNullOrEmpty()]
-	[ValidateSet('backup','replication')] 
-    [string]$DPE_retentionMode = "replication", 
+	[ValidateSet('backup','replication')]
+    [string]$DPE_retentionMode = "replication",
 	[ValidateSet('days', 'weeks', 'months', 'years')]
 	$DPERetentionUnits
 	$DPE_API_IP = $Global:DPE_API_IP,
@@ -809,21 +814,21 @@ process
 		options = @(
 					@{ name = 'ddr'
 					 value = $ddr.IsPresent.ToString().ToLower()
-					 })  
-                name = $DPE_DATASETNAME  
-    } | ConvertTo-Json -Depth 7                   
-	
+					 })
+                name = $DPE_DATASETNAME
+    } | ConvertTo-Json -Depth 7
+
 	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$DPE_Project_ID/$Myself"
-		if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
 		{
 		Write-Verbose $requestURL
 		$Jsonbody
-		}    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL
+		}
+    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Post -Body $Jsonbody -Uri $requestURL
 }
 end
 {
-
- 
 	}
 }
 #>

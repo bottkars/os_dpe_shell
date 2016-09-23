@@ -460,11 +460,12 @@ Function Get-DPEInstancebackups
     [CmdletBinding(DefaultParameterSetName = '0')]
     Param
     (
-	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
-    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
+    $token = $GLobal:DPE_PROJECT_TOKEN,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
 	[ValidateNotNullOrEmpty()]
+	[alias('id')]
     [string]$OS_Instance_ID,
 	[ValidateNotNullOrEmpty()]
     [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
@@ -478,7 +479,11 @@ begin
     $Myself = $MyInvocation.MyCommand.Name.Substring(15)
     $Providers = @()
     $Method = "Get"
+	}
 
+process
+
+{
 	Write-Verbose $OS_Instance_ID
 	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/instances/$OS_Instance_ID/$Myself" 
 	Write-Verbose $requestURL
@@ -486,13 +491,10 @@ begin
 		{
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
 		}
+	$Output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL | Select-Object -ExpandProperty $Myself
+	$Output | Add-Member -TypeName DPEBackup
+	Write-Output $Output
 
-	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL | Select-Object -ExpandProperty $Myself
-	}
-
-process
-
-{
 }
 end
 {
@@ -981,9 +983,11 @@ function Get-OSusers
     [CmdletBinding()]
     Param
     (
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $token = $Global:DPE_PROJECT_TOKEN,
     $OS_CONTROLLER_IP = $Global:OS_KEYSTONE_IP,
     [int]$OS_CONTROLLER_PORT = $Global:OS_KEYSTONE_PORT,
-    $token,
 	$OS_API_VER = $Global:OS_API_VER
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
@@ -992,9 +996,9 @@ $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
 $requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$Myself"
 #$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
 Write-Verbose $requestURL
-$Object = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
-$Object.pstypenames.Insert(0,'OS_groups')
-Write-Output $Object
+$Output = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output | Add-Member -TypeName OSuser
+Write-Output $Output
 }
 
 <#

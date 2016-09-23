@@ -321,6 +321,147 @@ end
     #
 }
 }
+
+Function Get-DPEInstancebackups
+{
+    [CmdletBinding(DefaultParameterSetName = '0')]
+    Param
+    (
+	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[ValidateNotNullOrEmpty()]
+    $token,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
+	[ValidateNotNullOrEmpty()]
+    [string]$OS_Instance_ID,
+	[ValidateNotNullOrEmpty()]
+    [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
+	$DPE_API_IP = $Global:DPE_API_IP,
+    [int]$DPE_API_PORT = 8080,
+    $DPE_API_VER = "v1"
+    )
+begin
+    {
+    $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
+    $Myself = $MyInvocation.MyCommand.Name.Substring(15)
+    $Providers = @()
+    $Method = "Get"
+
+	Write-Verbose $OS_Instance_ID
+	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/instances/$OS_Instance_ID/$Myself" 
+	Write-Verbose $requestURL
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+		{
+		write-Host $PSCmdlet.MyInvocation.BoundParameters
+		}
+
+	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL | Select-Object -ExpandProperty $Myself
+	}
+
+process
+
+{
+}
+end
+{
+    #
+    #Write-Verbose $requestURL
+    #
+}
+}
+
+Function Get-DPEbackups
+{
+    [CmdletBinding(DefaultParameterSetName = '0')]
+    Param
+    (
+	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[ValidateNotNullOrEmpty()]
+    $token,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
+	[Alias('id')]
+    [string]$DPE_Backup_ID,
+	[ValidateNotNullOrEmpty()]
+    [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
+	$DPE_API_IP = $Global:DPE_API_IP,
+    [int]$DPE_API_PORT = 8080,
+    $DPE_API_VER = "v1"
+    )
+begin
+    {
+    $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
+    $Myself = $MyInvocation.MyCommand.Name.Substring(7)
+    $Providers = @()
+    $Method = "Get"
+	}
+
+process
+{
+	Write-Verbose $DPE_Backup_ID
+	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_Backup_ID" 
+	Write-Verbose $requestURL
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+		{
+		write-Host $PSCmdlet.MyInvocation.BoundParameters
+		}
+
+	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL #| Select-Object -ExpandProperty $Myself
+}
+end
+{
+    #
+    #Write-Verbose $requestURL
+    #
+}
+}
+
+Function Restore-DPEbackups
+{
+    [CmdletBinding(DefaultParameterSetName = '0')]
+    Param
+    (
+	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[ValidateNotNullOrEmpty()]
+    $token,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
+	[Alias('id')]
+    [string]$DPE_Backup_ID,
+	[ValidateSet('original', 'new')]
+	$restore_type = 'new',
+	[ValidateNotNullOrEmpty()]
+    [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
+	$DPE_API_IP = $Global:DPE_API_IP,
+    [int]$DPE_API_PORT = 8080,
+    $DPE_API_VER = "v1"
+    )
+begin
+    {
+    $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
+    $Myself = $MyInvocation.MyCommand.Name.Substring(11)
+    $Providers = @()
+    $Method = "POST"
+	$jsonbody = @{ restore_type = $restore_type} | ConvertTo-Json
+	}
+
+process
+{
+	Write-Verbose $DPE_Backup_ID
+	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_Backup_ID" 
+	Write-Verbose $requestURL
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+		{
+		write-Host $PSCmdlet.MyInvocation.BoundParameters
+		}
+
+	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL -Body $jsonbody #| Select-Object -ExpandProperty $Myself
+}
+end
+{
+    #
+    #Write-Verbose $requestURL
+    #
+}
+}
+
 Function Get-DPEinstances
 {
     [CmdletBinding(DefaultParameterSetName = '0')]

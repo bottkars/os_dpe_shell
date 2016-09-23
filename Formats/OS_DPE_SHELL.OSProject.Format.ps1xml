@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+  <ViewDefinitions>
+    <View>
+      <Name>OSProject</Name>
+      <ViewSelectedBy>
+        <TypeName>OSProject</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>OS ProjectName</Label>
+            <!--<AutoSize/>-->
+            <Alignment>Left</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>OS ProjectID</Label>
+            <!--<AutoSize/>-->
+            <Alignment>Left</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Domain ID</Label>
+            <!--<AutoSize/>-->
+            <Alignment>Left</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Parent ID</Label>
+            <!--<AutoSize/>-->
+            <Alignment>Left</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>links</Label>
+            <!--<AutoSize/>-->
+            <Alignment>Left</Alignment>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <PropertyName>name</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>id</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>domain_id</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>parent_id</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>links</PropertyName>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

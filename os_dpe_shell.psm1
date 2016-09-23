@@ -1,3 +1,85 @@
+function Get-DPEADMINToken
+{
+    [CmdletBinding()]
+    Param
+    (
+	[ValidateNotNullOrEmpty()]
+    $OS_USERNAME = $Global:OS_ADMIN_USERNAME,
+	[ValidateNotNullOrEmpty()]
+    $OS_Password = $Global:OS_ADMIN_PASSWORD,
+	[ValidateNotNullOrEmpty()]
+    $OS_DOMAIN = $Global:OS_DOMAIN,
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $OS_ADMIN_PROJECT_NAME = $Global:OS_ADMIN_PROJECT_NAME,
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateSet('project','domain')]$scope = 'project',
+	[ValidateNotNullOrEmpty()]
+    $OS_KEYSTONE_IP = $Global:OS_KEYSTONE_IP,
+	[ValidateNotNullOrEmpty()]
+    [int]$OS_KEYSTONE_PORT = $Global:OS_KEYSTONE_PORT,
+    $OS_API_VER = "v3"
+    )
+
+$GLOBAL:DPE_ADMIN_TOKEN = (Get-OSToken -OS_USERNAME $OS_ADMIN_USERNAME -OS_Password $OS_PROJECT_PASWORD -OS_DOMAIN $OS_DOMAIN -OS_PROJECT_NAME $OS_ADMIN_PROJECT_NAME -scope $scope -OS_KEYSTONE_IP $OS_KEYSTONE_IP -OS_API_VER $OS_API_VER -OS_KEYSTONE_PORT $OS_KEYSTONE_PORT).token
+Write-Output $GLOBAL:DPE_ADMIN_TOKEN
+}
+
+function Get-DPEProviderToken
+{
+    [CmdletBinding()]
+    Param
+    (
+	[ValidateNotNullOrEmpty()]
+    $OS_USERNAME = $Global:OS_PROVIDER_USERNAME,
+	[ValidateNotNullOrEmpty()]
+    $OS_Password = $Global:OS_PROVIDER_PASSWORD,
+	[ValidateNotNullOrEmpty()]
+    $OS_DOMAIN = $Global:OS_DOMAIN,
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $OS_PROVIDER_PROJECT_NAME = $Global:OS_PROVIDER_PROJECT_NAME,
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateSet('project','domain')]$scope = 'project',
+	[ValidateNotNullOrEmpty()]
+    $OS_KEYSTONE_IP = $Global:OS_KEYSTONE_IP,
+	[ValidateNotNullOrEmpty()]
+    [int]$OS_KEYSTONE_PORT = $Global:OS_KEYSTONE_PORT,
+    $OS_API_VER = "v3"
+    )
+
+$GLOBAL:DPE_PROVIDER_TOKEN = (Get-OSToken -OS_USERNAME $OS_PROVIDER_USERNAME -OS_Password $OS_PROJECT_PASWORD -OS_DOMAIN $OS_DOMAIN -OS_PROJECT_NAME $OS_PROVIDER_PROJECT_NAME -scope $scope -OS_KEYSTONE_IP $OS_KEYSTONE_IP -OS_API_VER $OS_API_VER -OS_KEYSTONE_PORT $OS_KEYSTONE_PORT).token
+Write-Output $GLOBAL:DPE_PROVIDER_TOKEN
+}
+
+
+function Get-DPEProjectToken
+{
+    [CmdletBinding()]
+    Param
+    (
+	[ValidateNotNullOrEmpty()]
+    $OS_USERNAME = $Global:OS_PROJECT_USERNAME,
+	[ValidateNotNullOrEmpty()]
+    $OS_Password = $Global:OS_PROJECT_PASSWORD,
+	[ValidateNotNullOrEmpty()]
+    $OS_DOMAIN = $Global:OS_DOMAIN,
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $OS_PROJECT_PROJECT_NAME = $Global:OS_PROJECT_PROJECT_NAME,
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateSet('project','domain')]$scope = 'project',
+	[ValidateNotNullOrEmpty()]
+    $OS_KEYSTONE_IP = $Global:OS_KEYSTONE_IP,
+	[ValidateNotNullOrEmpty()]
+    [int]$OS_KEYSTONE_PORT = $Global:OS_KEYSTONE_PORT,
+    $OS_API_VER = "v3"
+    )
+
+$GLOBAL:DPE_PROJECT_TOKEN = (Get-OSToken -OS_USERNAME $OS_PROJECT_USERNAME -OS_Password $OS_PROJECT_PASWORD -OS_DOMAIN $OS_DOMAIN -OS_PROJECT_NAME $OS_PROJECT_PROJECT_NAME -scope $scope -OS_KEYSTONE_IP $OS_KEYSTONE_IP -OS_API_VER $OS_API_VER -OS_KEYSTONE_PORT $OS_KEYSTONE_PORT).token
+Write-Output $GLOBAL:DPE_PROJECT_TOKEN
+}
+
 function Get-OSToken
 {
     [CmdletBinding()]
@@ -103,9 +185,9 @@ Function Get-DPEprotectionProviders
     [CmdletBinding()]
     Param
     (
-    [Parameter(ParameterSetName = "1",Mandatory = $true)]
+    [Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $Global:DPE_ADMIN_TOKEN,
 	[ValidateNotNullOrEmpty()]
     $DPE_API_IP = $GLOBAL:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
@@ -115,7 +197,9 @@ $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
 $Myself = $MyInvocation.MyCommand.Name.Substring(7)
 $requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/protectionProviders"
 Write-Verbose $requestURL
-Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output | Add-Member -TypeName DPEProtectionProvider
+Write-Output $Output
 }
 Function Unregister-DPEprotectionProviders
 {
@@ -123,9 +207,9 @@ Function Unregister-DPEprotectionProviders
     [CmdletBinding()]
     Param
     (
-	[Parameter(ParameterSetName = "1",Mandatory = $true)]
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $GLOBAL:DPE_ADMIN_TOKEN,
 	[Parameter(ParameterSetName = "1",Mandatory = $true)]
     $DPE_Providerid,
 	[ValidateNotNullOrEmpty()]
@@ -139,6 +223,7 @@ $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
 $requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_Providerid"
 Write-Verbose $requestURL
 Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
+
 }
 
 Function Register-DPEprotectionProviders
@@ -147,9 +232,9 @@ Function Register-DPEprotectionProviders
     [CmdletBinding()]
     Param
     (
-	[Parameter(ParameterSetName = "1",Mandatory = $true)]
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $Global:DPE_PROVIDER_TOKEN,
 	[ValidateNotNullOrEmpty()]
     $MC_USERNAME = $GLobal:MC_USERNAME,
 	[ValidateNotNullOrEmpty()]
@@ -327,9 +412,9 @@ Function Get-DPEProjectinstances
     [CmdletBinding(DefaultParameterSetName = '0')]
     Param
     (
-	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $GLobal:DPE_PROJECT_TOKEN,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
 	[ValidateNotNullOrEmpty()]
     [alias('id')][string]$OS_Project_ID,
@@ -358,7 +443,9 @@ Write-Verbose $requestURL
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
 		}
 
-Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method  -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method  -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output | Add-Member -TypeName DPEInstance
+Write-Output $Output
 }
 end
 {
@@ -702,9 +789,9 @@ Function Get-DPEprojects
      [CmdletBinding()]
     Param
     (
-	[Parameter(ParameterSetName = "1",Mandatory = $true)]
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $GLobal:DPE_ADMIN_TOKEN,
 	[ValidateNotNullOrEmpty()]
 	$DPE_API_IP = $Global:DPE_API_IP,
     [int]$DPE_API_PORT = 8080,
@@ -766,11 +853,13 @@ function Get-OSservers
     [CmdletBinding()]
     Param
     (
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $token = $GLobal:DPE_PROJECT_TOKEN,
+	$OS_PROJECT_ID,
     $OS_NOVA_IP = "$Global:OS_KEYSTONE_IP",
-    [int]$OS_NOVA_PORT = 8774,
-    $token,
-	$OS_PROJECT_ID
-    )
+    [int]$OS_NOVA_PORT = 8774    
+	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
 $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
 #
@@ -785,9 +874,11 @@ function Get-OSprojects
     [CmdletBinding()]
     Param
     (
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $token = $GLobal:DPE_PROVIDER_TOKEN,
     $OS_CONTROLLER_IP = "192.168.2.203",
     [int]$OS_CONTROLLER_PORT = 5000,
-    $token,
 	$OS_API_VER = "v3"
 	)
 $Myself = $MyInvocation.MyCommand.Name.Substring(6)
@@ -797,7 +888,7 @@ $requestURL = "http://$($OS_CONTROLLER_IP):$($OS_CONTROLLER_PORT)/$OS_API_VER/$M
 #$requestURL =  "http://ubuntu3:8774/v2/776e922dceca4773b5986e15d579365b/servers/348285c6-1a89-4fad-acc1-8e9b34619b95"
 Write-Verbose $requestURL
 $Projects = Invoke-RestMethod -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Uri $requestURL | Select-Object -ExpandProperty $Myself
-$Projects.pstypenames.Insert(0,'OS_PROCECTS')
+$Projects | Add-Member -TypeName OSProject
 Write-Output $Projects
 }
 

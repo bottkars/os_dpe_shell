@@ -406,7 +406,53 @@ end
     #
 }
 }
+Function Get-DPEProjecttasks
+{
+    [CmdletBinding(DefaultParameterSetName = '0')]
+    Param
+    (
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $token = $GLobal:DPE_PROJECT_TOKEN,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
+	[ValidateNotNullOrEmpty()]
+    [alias('id')][string]$OS_Project_ID,
+ 	[ValidateNotNullOrEmpty()]
+    [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
+	$DPE_API_IP = $Global:DPE_API_IP,
+    [int]$DPE_API_PORT = 8080,
+    $DPE_API_VER = "v1"
+    )
+begin
+    {
+    $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
+    $Myself = $MyInvocation.MyCommand.Name.Substring(14)
+    $Providers = @()
+    $Method = "Get"
+    }
 
+process
+
+{
+Write-Verbose $OS_Project_ID
+$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$OS_Project_ID/$Myself"
+Write-Verbose $requestURL
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+		{
+		write-Host $PSCmdlet.MyInvocation.BoundParameters
+		}
+
+Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method  -Uri $requestURL | Select-Object -ExpandProperty $Myself
+#$Output | Add-Member -TypeName DPETask
+#Write-Output $Output
+}
+end
+{
+    #
+    #Write-Verbose $requestURL
+    #
+}
+}
 Function Get-DPEProjectinstances
 {
     [CmdletBinding(DefaultParameterSetName = '0')]
@@ -454,7 +500,6 @@ end
     #
 }
 }
-
 Function Get-DPEInstancebackups
 {
     [CmdletBinding(DefaultParameterSetName = '0')]
@@ -509,11 +554,12 @@ Function Get-DPEbackups
     [CmdletBinding(DefaultParameterSetName = '0')]
     Param
     (
-	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $GLobal:DPE_PROJECT_TOKEN,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
-	[Alias('id')]
+	[ValidateNotNullOrEmpty()]
+	[alias('id')]
     [string]$DPE_Backup_ID,
 	[ValidateNotNullOrEmpty()]
     [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
@@ -528,7 +574,6 @@ begin
     $Providers = @()
     $Method = "Get"
 	}
-
 process
 {
 	Write-Verbose $DPE_Backup_ID
@@ -538,8 +583,9 @@ process
 		{
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
 		}
-
-	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL #| Select-Object -ExpandProperty $Myself
+	$Output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL #| Select-Object -ExpandProperty $Myself
+	$Output | Add-Member -TypeName DPEBackup
+	Write-Output $Output
 }
 end
 {
@@ -601,11 +647,12 @@ Function Get-DPEtasks
     [CmdletBinding(DefaultParameterSetName = '0')]
     Param
     (
-	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
-    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
+    $token = $Global:DPE_PROJECT_TOKEN,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
 	[ValidateNotNullOrEmpty()]
+	[alias('id')]
     [string]$DPE_TASK_ID,
 	[ValidateNotNullOrEmpty()]
     [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
@@ -620,6 +667,11 @@ begin
     $Providers = @()
     $Method = "Get"
 
+	}
+
+process
+
+{
 	Write-Verbose $DPE_TASK_ID
 	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/$Myself/$DPE_TASK_ID"
 	Write-Verbose $requestURL
@@ -628,12 +680,10 @@ begin
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
 		}
 
-	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
-	}
-
-process
-
-{
+	
+	$Output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
+	$Output | Add-Member -TypeName DPETask
+	Write-Output $Output
 }
 end
 {
@@ -742,10 +792,12 @@ Function Start-DPEbackups
     [CmdletBinding(DefaultParameterSetName = '0')]
     Param
     (
-	[Parameter(ParameterSetName = "0",Mandatory = $true)]
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
-    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$false,ParameterSetName = '0')]
+    $token = $GLobal:DPE_PROJECT_TOKEN,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
+	[ValidateNotNullOrEmpty()]
+	[alias('id')]
 	[ValidateNotNullOrEmpty()]
     [string]$OS_Instance_ID,
 	[ValidateNotNullOrEmpty()]
@@ -757,12 +809,12 @@ Function Start-DPEbackups
 begin
     {
     $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
-    $Myself = $MyInvocation.MyCommand.Name.Substring(9
-
-	)
-    $Providers = @()
+    $Myself = $MyInvocation.MyCommand.Name.Substring(9)
+	$Providers = @()
     $Method = "Post"
-
+	}
+process
+{
 	Write-Verbose $OS_Instance_ID
 	$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/instances/$OS_Instance_ID/$Myself"
 	Write-Verbose $requestURL
@@ -771,12 +823,10 @@ begin
 		write-Host $PSCmdlet.MyInvocation.BoundParameters
 		}
 
-	Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
-	}
+	$output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method -Uri $requestURL
+	$Output | Add-Member -TypeName DPETask
+	Write-Output $Output
 
-process
-
-{
 }
 end
 {
@@ -791,6 +841,7 @@ Function Get-DPEprojects
      [CmdletBinding()]
     Param
     (
+	#TOKEN requires ADMIN Priviliges
 	[Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
     $token = $GLobal:DPE_ADMIN_TOKEN,

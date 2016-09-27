@@ -120,6 +120,7 @@ switch ($scope)
 		$OS_SCOPE_NAME = $OS_DOMAIN
 		}
 	}
+Write-Host -ForegroundColor Magenta " ==>Getting token for $OS_USERNAME using domain: $OS_DOMAIN, scope: $scope, project: $OS_PROJECT_NAME" 
 $jsonbody = [ordered]@{auth = [ordered]@{
                 identity = [ordered]@{
                     methods = @("password")

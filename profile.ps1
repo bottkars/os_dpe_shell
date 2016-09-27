@@ -18,4 +18,6 @@ $Global:OS_ADMIN_USERNAME = "admin"
 $Global:OS_ADMIN_PASWORD = "Password123!"
 $Global:OS_PROJECT_USERNAME = "Prod_admin"
 $Global:OS_PROJECT_PASWORD = "Password123!"
-
+Get-DPEADMINToken
+Get-DPEProjectToken
+Get-DPEProviderToken

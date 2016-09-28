@@ -454,6 +454,101 @@ end
     #
 }
 }
+Function Get-DPEProjectjobs
+{
+    [CmdletBinding(DefaultParameterSetName = '0')]
+    Param
+    (
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $token = $GLobal:DPE_PROJECT_TOKEN,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
+	[ValidateNotNullOrEmpty()]
+    [alias('id')][string]$OS_Project_ID,
+ 	[ValidateNotNullOrEmpty()]
+    [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
+	$DPE_API_IP = $Global:DPE_API_IP,
+    [int]$DPE_API_PORT = 8080,
+    $DPE_API_VER = "v1"
+    )
+begin
+    {
+    $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
+    $Myself = $MyInvocation.MyCommand.Name.Substring(14)
+    $Providers = @()
+    $Method = "Get"
+    }
+
+process
+
+{
+Write-Verbose $OS_Project_ID
+$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$OS_Project_ID/$Myself"
+Write-Verbose $requestURL
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+		{
+		write-Host $PSCmdlet.MyInvocation.BoundParameters
+		}
+
+$Output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method  -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output | Add-Member -TypeName DPEjob
+Write-Output $Output
+}
+end
+{
+    #
+    #Write-Verbose $requestURL
+    #
+}
+}
+
+Function Get-DPEProjectpolicies
+{
+    [CmdletBinding(DefaultParameterSetName = '0')]
+    Param
+    (
+	[Parameter(ParameterSetName = "0",Mandatory = $false)]
+	[ValidateNotNullOrEmpty()]
+    $token = $GLobal:DPE_PROJECT_TOKEN,
+    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName = '0')]
+	[ValidateNotNullOrEmpty()]
+    [alias('id')][string]$OS_Project_ID,
+ 	[ValidateNotNullOrEmpty()]
+    [alias('zone')]$OS_ZONE_ID = $Global:OS_Zone_ID,
+	$DPE_API_IP = $Global:DPE_API_IP,
+    [int]$DPE_API_PORT = 8080,
+    $DPE_API_VER = "v1"
+    )
+begin
+    {
+    $OS_AUTH_HEADER = @{ "X-AUTH-TOKEN" = $token }
+    $Myself = $MyInvocation.MyCommand.Name.Substring(14)
+    $Providers = @()
+    $Method = "Get"
+    }
+
+process
+
+{
+Write-Verbose $OS_Project_ID
+$requestURL = "http://$($DPE_API_IP):$($DPE_API_PORT)/$DPE_API_VER/projects/$OS_Project_ID/$Myself"
+Write-Verbose $requestURL
+	if ($PSCmdlet.MyInvocation.BoundParameters["verbose"].IsPresent)
+		{
+		write-Host $PSCmdlet.MyInvocation.BoundParameters
+		}
+
+$Output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method $Method  -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output | Add-Member -TypeName DPEJobs
+Write-Output $Output
+}
+end
+{
+    #
+    #Write-Verbose $requestURL
+    #
+}
+}
 Function Get-DPEProjectinstances
 {
     [CmdletBinding(DefaultParameterSetName = '0')]
@@ -1071,9 +1166,9 @@ Function Add-DPEdatasets
     [CmdletBinding()]
     Param
     (
-	[Parameter(ParameterSetName = "1",Mandatory = $true)]
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $DPE_ADMIN_TOKEN,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='1')]
 	[ValidateNotNullOrEmpty()]
     [alias('id')][string]$DPE_Project_ID,
@@ -1120,9 +1215,9 @@ Function Get-DPEdatasets
     [CmdletBinding()]
     Param
     (
-	[Parameter(ParameterSetName = "1",Mandatory = $true)]
+	[Parameter(ParameterSetName = "1",Mandatory = $false)]
 	[ValidateNotNullOrEmpty()]
-    $token,
+    $token = $Global:DPE_ADMIN_TOKEN,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='1')]
 	[ValidateNotNullOrEmpty()]
     [alias('id')][string]$DPE_Project_ID,
@@ -1142,7 +1237,9 @@ process
 
 		Write-Verbose $requestURL
 
-    Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Body $Jsonbody -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output = Invoke-RestMethod  -ContentType "application/json" -Headers $OS_AUTH_HEADER -Method Get -Body $Jsonbody -Uri $requestURL | Select-Object -ExpandProperty $Myself
+$Output | Add-Member -TypeName DPEDataset
+Write-Output $Output
 }
 end
 {
